@@ -246,6 +246,50 @@ function deserialize_walletrpc_CreateSignatureResponse(buffer_arg) {
   return api_pb.CreateSignatureResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_walletrpc_CreateSplitTicketInputRequest(arg) {
+  if (!(arg instanceof api_pb.CreateSplitTicketInputRequest)) {
+    throw new Error('Expected argument of type walletrpc.CreateSplitTicketInputRequest');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_walletrpc_CreateSplitTicketInputRequest(buffer_arg) {
+  return api_pb.CreateSplitTicketInputRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_walletrpc_CreateSplitTicketInputResponse(arg) {
+  if (!(arg instanceof api_pb.CreateSplitTicketInputResponse)) {
+    throw new Error('Expected argument of type walletrpc.CreateSplitTicketInputResponse');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_walletrpc_CreateSplitTicketInputResponse(buffer_arg) {
+  return api_pb.CreateSplitTicketInputResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_walletrpc_CreateSplitTicketOutputsRequest(arg) {
+  if (!(arg instanceof api_pb.CreateSplitTicketOutputsRequest)) {
+    throw new Error('Expected argument of type walletrpc.CreateSplitTicketOutputsRequest');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_walletrpc_CreateSplitTicketOutputsRequest(buffer_arg) {
+  return api_pb.CreateSplitTicketOutputsRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_walletrpc_CreateSplitTicketOutputsResponse(arg) {
+  if (!(arg instanceof api_pb.CreateSplitTicketOutputsResponse)) {
+    throw new Error('Expected argument of type walletrpc.CreateSplitTicketOutputsResponse');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_walletrpc_CreateSplitTicketOutputsResponse(buffer_arg) {
+  return api_pb.CreateSplitTicketOutputsResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_walletrpc_CreateWalletRequest(arg) {
   if (!(arg instanceof api_pb.CreateWalletRequest)) {
     throw new Error('Expected argument of type walletrpc.CreateWalletRequest');
@@ -1695,6 +1739,28 @@ var WalletServiceService = exports.WalletServiceService = {
     requestDeserialize: deserialize_walletrpc_ValidateAddressRequest,
     responseSerialize: serialize_walletrpc_ValidateAddressResponse,
     responseDeserialize: deserialize_walletrpc_ValidateAddressResponse,
+  },
+  createSplitTicketOutputs: {
+    path: '/walletrpc.WalletService/CreateSplitTicketOutputs',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_pb.CreateSplitTicketOutputsRequest,
+    responseType: api_pb.CreateSplitTicketOutputsResponse,
+    requestSerialize: serialize_walletrpc_CreateSplitTicketOutputsRequest,
+    requestDeserialize: deserialize_walletrpc_CreateSplitTicketOutputsRequest,
+    responseSerialize: serialize_walletrpc_CreateSplitTicketOutputsResponse,
+    responseDeserialize: deserialize_walletrpc_CreateSplitTicketOutputsResponse,
+  },
+  createSplitTicketInput: {
+    path: '/walletrpc.WalletService/CreateSplitTicketInput',
+    requestStream: false,
+    responseStream: false,
+    requestType: api_pb.CreateSplitTicketInputRequest,
+    responseType: api_pb.CreateSplitTicketInputResponse,
+    requestSerialize: serialize_walletrpc_CreateSplitTicketInputRequest,
+    requestDeserialize: deserialize_walletrpc_CreateSplitTicketInputRequest,
+    responseSerialize: serialize_walletrpc_CreateSplitTicketInputResponse,
+    responseDeserialize: deserialize_walletrpc_CreateSplitTicketInputResponse,
   },
 };
 

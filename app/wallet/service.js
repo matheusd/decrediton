@@ -7,7 +7,12 @@ import {
   ValidateAddressRequest,
   GetTransactionsRequest,
   TransactionDetails,
+<<<<<<< HEAD
   PublishUnminedTransactionsRequest,
+=======
+  CreateSplitTicketOutputsRequest,
+  CreateSplitTicketInputRequest,
+>>>>>>> 52930db... more stuff on the wip
 } from "middleware/walletrpc/api_pb";
 import { withLog as log, withLogNoData, logOptionNoResponseData } from "./index";
 
@@ -194,3 +199,23 @@ export const publishUnminedTransactions = log((walletService) => new Promise((re
   const req = new PublishUnminedTransactionsRequest();
   walletService.publishUnminedTransactions(req, (err) => err ? reject(err) : resolve());
 }), "Publish Unmined Transactions");
+
+export const createSplitTicketOutputs = log((client, amount, fee) => new Promise((resolve, reject) => {
+  const req = new CreateSplitTicketOutputsRequest();
+  req.setAmount(amount);
+  req.setFee(fee);
+  client.createSplitTicketOutputs(req, (err, resp) => {
+    err ? reject(err) : resolve(resp);
+  });
+
+}), "Create Split Ticket Outputs");
+
+export const createSplitTicketInput = log((client, passphrase, ticketTemplate,
+  amount, fees) => new Promise((resolve, reject) => {
+    const req = new CreateSplitTicketInputRequest();
+    req.setPassphrase(new Uint8Array(Buffer.from(passphrase)));
+    req.setTicketTemplate(ticketTemplate);
+    req.setAmount(amount);
+    req.setFees(fees);
+    client.createSplitTicketInput(req, (err, resp) => err ? reject(err) : resolve(resp));
+  }), "Create Split Ticket Input");

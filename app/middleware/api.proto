@@ -54,6 +54,9 @@ service WalletService {
 	rpc LoadActiveDataFilters(LoadActiveDataFiltersRequest) returns (LoadActiveDataFiltersResponse);
 	rpc SignMessage (SignMessageRequest) returns (SignMessageResponse);
 	rpc ValidateAddress (ValidateAddressRequest) returns (ValidateAddressResponse);
+
+	rpc CreateSplitTicketOutputs(CreateSplitTicketOutputsRequest) returns (CreateSplitTicketOutputsResponse);
+	rpc CreateSplitTicketInput(CreateSplitTicketInputRequest) returns (CreateSplitTicketInputResponse);
 }
 
 service WalletLoaderService {
@@ -841,4 +844,31 @@ message ValidateAddressResponse {
 	ScriptType script_type = 8;
 	bytes pay_to_addr_script = 9;
 	uint32 sigs_required = 10;
+}
+
+message CreateSplitTicketOutputsRequest {
+	uint64 amount = 1;
+	uint64 fee = 2;
+}
+
+message CreateSplitTicketOutputsResponse {
+	message TxOut {
+		uint64 value = 1;
+		bytes script = 2;
+	}
+	TxOut commitment_output = 1;
+	TxOut change_output = 2;
+}
+
+message CreateSplitTicketInputRequest {
+	bytes passphrase = 1;
+	bytes ticket_template = 2;
+	uint64 amount = 3;
+	uint64 fees = 4;
+}
+
+message CreateSplitTicketInputResponse {
+	bytes split_tx = 1;
+	int32 split_tx_output_index = 2;
+	bytes input_scriptsig = 3;
 }

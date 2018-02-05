@@ -15,6 +15,8 @@ import { TransactionDetails } from "middleware/walletrpc/api_pb";
 import { clipboard } from "electron";
 import { getStartupStats } from "./StatisticsActions";
 
+import * as tsm from "middleware/grpc/ticketmatcher";
+
 export const GETWALLETSERVICE_ATTEMPT = "GETWALLETSERVICE_ATTEMPT";
 export const GETWALLETSERVICE_FAILED = "GETWALLETSERVICE_FAILED";
 export const GETWALLETSERVICE_SUCCESS = "GETWALLETSERVICE_SUCCESS";
@@ -439,7 +441,10 @@ export const getTicketsInfoAttempt = () => (dispatch, getState) => {
 
   dispatch({ type: GETTICKETS_ATTEMPT });
   wallet.getTickets(sel.walletService(getState()), startRequestHeight, endRequestHeight)
-    .then(tickets => setTimeout(() => dispatch({ tickets, type: GETTICKETS_COMPLETE }), 1000))
+    .then(tickets => setTimeout(() => {
+      dispatch({ tickets, type: GETTICKETS_COMPLETE });
+      dispatch(splitTicketPurchase());
+    }, 1000))
     .catch(error => console.error(error + " Please try again"));
 };
 
@@ -793,4 +798,60 @@ export const copySeedToClipboard = (mnemonic) => (dispatch) => {
   clipboard.clear();
   clipboard.writeText(mnemonic);
   dispatch({ type: SEEDCOPIEDTOCLIPBOARD });
+};
+
+export const splitTicketPurchase = () => async (dispatch, getState) => {
+
+  const voteAddr = "TcgmV9RJ9NgWRFGMRGerUdHVGBXK5DJZQnV";
+  const availableAmount = 100 * 1e8;
+  const passphrase = "123";
+
+  try {
+    const client = await tsm.getSplitTicketMatcherService("localhost", 8475);
+    console.log("got matcher svc", client);
+
+    const status = await tsm.getStatus(client);
+    console.log("got status", status);
+
+    const contrib = await tsm.findMatches(client, availableAmount);
+    console.log("contrib", contrib);
+
+    const { walletService, decodeMessageService } = getState().grpc;
+    const outputs = await wallet.createSplitTicketOutputs(walletService, contrib.amount,
+      contrib.fee);
+    console.log("outputs", outputs.toObject());
+
+    const commitValue = outputs.getCommitmentOutput().getValue();
+    const commitScript = outputs.getCommitmentOutput().getScript();
+    const changeValue = outputs.getChangeOutput().getValue();
+    const changeScript = outputs.getChangeOutput().getScript();
+
+    // console.log("xxx", commitValue, commitScript, changeValue,
+    //   changeScript, voteAddr);
+
+    const ticketTempl = await tsm.generateTicket(client, commitValue, commitScript, changeValue,
+      changeScript, voteAddr, contrib.sessionId);
+    console.log("ticket template", ticketTempl.toObject());
+
+    const rawTicketTempl = Buffer.from(ticketTempl.getTransaction()).toString("hex");
+    // console.log("raw ticket templ", rawTicketTempl);
+    const decodedTicketTempl = await wallet.decodeTransaction(decodeMessageService, rawTicketTempl);
+    console.log("decoded ticket templ", decodedTicketTempl.toObject());
+
+    const input = await wallet.createSplitTicketInput(walletService, passphrase,
+      ticketTempl.getTransaction(), contrib.amount, contrib.fee);
+    const rawSignedSplitTx = Buffer.from(input.getSplitTx()).toString("hex");
+    // const decodedSignedSplitTx = await wallet.decodeTransaction(decodeMessageService, rawSignedSplitTx);
+    //console.log("ticket input", input.toObject());
+    console.log("raw split tx", rawSignedSplitTx);
+
+    const ticket = await tsm.publishTicket(client, contrib.sessionId,
+      input.getSplitTx(), input.splitTxOutputIndex, input.getInputScriptsig());
+    // console.log("final ticket", ticket.toObject);
+    const rawFinalTicket = Buffer.from(ticket.getTicketTx()).toString("hex");
+    console.log("final raw ticket", rawFinalTicket);
+
+  } catch (err) {
+    console.log("errrrrrr no split ticket purchase", err);
+  }
 };
