@@ -439,6 +439,25 @@ const DecodeDaemonIPCData = (data, cb) => {
   }
 };
 
+// DecodeDaemonIPCData decodes messages from an IPC message received from dcrd/
+// dcrwallet using their internal IPC protocol.
+// NOTE: very simple impl for the moment, will break if messages get split
+// between data calls.
+const DecodeDaemonIPCData = (data, cb) => {
+  let i = 0;
+  while (i < data.length) {
+    if (data[i++] !== 0x01) throw "Wrong protocol version when decoding IPC data";
+    const mtypelen = data[i++];
+    const mtype = data.slice(i, i+mtypelen).toString("utf-8");
+    i += mtypelen;
+    const psize = data.readUInt32LE(i);
+    i += 4;
+    const payload = data.slice(i, i+psize);
+    i += psize;
+    cb(mtype, payload);
+  }
+};
+
 const launchDCRD = (walletPath, appdata, testnet) => {
   var spawn = require("child_process").spawn;
   let args = [];
@@ -527,6 +546,8 @@ const launchDCRWallet = (walletPath, testnet) => {
   args.push("--ticketbuyer.maxpricerelative=" + cfg.get("maxpricerelative"));
   args.push("--ticketbuyer.maxpriceabsolute=" + cfg.get("maxpriceabsolute"));
   args.push("--ticketbuyer.maxperblock=" + cfg.get("maxperblock"));
+  args.push("--rpclistenerevents");
+  args.push("--pipetx=4");
 
   var dcrwExe = getExecutablePath("dcrwallet");
   if (!fs.existsSync(dcrwExe)) {
