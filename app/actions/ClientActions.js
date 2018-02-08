@@ -843,12 +843,16 @@ export const splitTicketPurchase = () => async (dispatch, getState) => {
     const rawSignedSplitTx = Buffer.from(input.getSplitTx()).toString("hex");
     // const decodedSignedSplitTx = await wallet.decodeTransaction(decodeMessageService, rawSignedSplitTx);
     //console.log("ticket input", input.toObject());
-    console.log("raw split tx", rawSignedSplitTx);
 
     const ticket = await tsm.publishTicket(client, contrib.sessionId,
       input.getSplitTx(), input.splitTxOutputIndex, input.getInputScriptsig());
     // console.log("final ticket", ticket.toObject);
     const rawFinalTicket = Buffer.from(ticket.getTicketTx()).toString("hex");
+    const decodedFinalTicket = await wallet.decodeTransaction(decodeMessageService, rawFinalTicket);
+    console.log("decoded final ticket", decodedFinalTicket.toObject());
+
+    console.log("============ to publish =========");
+    console.log("raw split tx", rawSignedSplitTx);
     console.log("final raw ticket", rawFinalTicket);
 
   } catch (err) {
