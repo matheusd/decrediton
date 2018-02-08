@@ -7,12 +7,9 @@ import {
   ValidateAddressRequest,
   GetTransactionsRequest,
   TransactionDetails,
-<<<<<<< HEAD
   PublishUnminedTransactionsRequest,
-=======
   CreateSplitTicketOutputsRequest,
   CreateSplitTicketInputRequest,
->>>>>>> 52930db... more stuff on the wip
 } from "middleware/walletrpc/api_pb";
 import { withLog as log, withLogNoData, logOptionNoResponseData } from "./index";
 
