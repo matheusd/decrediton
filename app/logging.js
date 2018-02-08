@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { appDataDirectory } from "./config";
 import winston from "winston";
 import path from "path";
 
@@ -56,7 +56,7 @@ export function createLogger(debug) {
     transports: [
       new (winston.transports.File)({
         json: false,
-        filename: path.join(app.getPath("userData"), "decrediton.log"),
+        filename: path.join(appDataDirectory(), "decrediton.log"),
         timestamp: logTimestamp,
         formatter: logFormatter,
       })

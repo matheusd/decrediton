@@ -2,6 +2,7 @@ import Promise from "promise";
 import { ipcRenderer } from "electron";
 import { isString } from "util";
 import { withLog as log, logOptionNoResponseData } from "./app";
+import { setCustomAppDataPath } from "../config";
 
 export const startDaemon = log((walletPath, appData, testnet) => Promise
   .resolve(ipcRenderer.sendSync("start-daemon", walletPath, appData, testnet))
@@ -36,6 +37,10 @@ export const startWallet = log((walletPath, testnet) => new Promise((resolve, re
   // resolveCheck must be done both on the dcrwallet-port event and on the
   // return of the sendSync call because we can't be certain which will happen first
   const resolveCheck = () => pid && port ? resolve({ pid, port }) : null;
+
+  ipcRenderer.on("set-custom-config-appdatapath", (e, path) => {
+    setCustomAppDataPath(path);
+  });
 
   ipcRenderer.once("dcrwallet-port", (e, p) => { port = p; resolveCheck(); });
   pid = ipcRenderer.sendSync("start-wallet", walletPath, testnet);

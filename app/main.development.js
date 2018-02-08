@@ -56,13 +56,14 @@ Usage
                [--extrawalletargs=...]
 
 Options
-  --help             Show help and exit
-  --version          Show version and exit
-  --debug  -d        Debug daemon/wallet messages
-  --testnet          Connect to testnet
-  --mainnet          Connect to mainnet
-  --extrawalletargs  Pass extra arguments to dcrwallet
-  --customBinPath    Custom path for dcrd/dcrwallet/dcrctl binaries
+  --help              Show help and exit
+  --version           Show version and exit
+  --debug  -d         Debug daemon/wallet messages
+  --testnet           Connect to testnet
+  --mainnet           Connect to mainnet
+  --extrawalletargs   Pass extra arguments to dcrwallet
+  --customBinPath     Custom path for dcrd/dcrwallet/dcrctl binaries
+  --customAppDataPath Custom path for all decrediton data
 `);
 }
 
@@ -88,6 +89,10 @@ if (argv.version) {
   app.exit(0);
 }
 
+if (argv.customAppDataPath) {
+  setCustomAppDataPath(argv.customAppDataPath);
+}
+
 if (process.env.NODE_ENV === "production") {
   const sourceMapSupport = require('source-map-support'); // eslint-disable-line
   sourceMapSupport.install();
@@ -103,7 +108,7 @@ if (process.env.NODE_ENV === "development") {
 app.setPath("userData", appDataDirectory());
 
 // Check that wallets directory has been created, if not, make it.
-let walletsDirectory = path.join(app.getPath("userData"),"wallets");
+let walletsDirectory = path.join(appDataDirectory(),"wallets");
 fs.pathExistsSync(walletsDirectory) || fs.mkdirsSync(walletsDirectory);
 fs.pathExistsSync(path.join(walletsDirectory, "mainnet")) || fs.mkdirsSync(path.join(walletsDirectory, "mainnet"));
 fs.pathExistsSync(path.join(walletsDirectory, "testnet")) || fs.mkdirsSync(path.join(walletsDirectory, "testnet"));
@@ -113,14 +118,14 @@ if (!fs.pathExistsSync(defaultMainnetWalletDirectory)){
   fs.mkdirsSync(defaultMainnetWalletDirectory);
 
   // check for existing mainnet directories
-  if (fs.pathExistsSync(path.join(app.getPath("userData"), "mainnet", "wallet.db"))) {
+  if (fs.pathExistsSync(path.join(appDataDirectory(), "mainnet", "wallet.db"))) {
     fs.mkdirsSync(path.join(defaultMainnetWalletDirectory, "mainnet"));
-    fs.copySync(path.join(app.getPath("userData"), "mainnet"), path.join(defaultMainnetWalletDirectory, "mainnet"));
+    fs.copySync(path.join(appDataDirectory(), "mainnet"), path.join(defaultMainnetWalletDirectory, "mainnet"));
   }
 
   // copy over existing config.json if it exists
-  if (fs.pathExistsSync(path.join(app.getPath("userData"), "config.json"))) {
-    fs.copySync(path.join(app.getPath("userData"), "config.json"), path.join(defaultMainnetWalletDirectory, "config.json"));
+  if (fs.pathExistsSync(path.join(appDataDirectory(), "config.json"))) {
+    fs.copySync(path.join(appDataDirectory(), "config.json"), path.join(defaultMainnetWalletDirectory, "config.json"));
   }
 
   // create new configs for default mainnet wallet
@@ -134,14 +139,14 @@ if (!fs.pathExistsSync(defaultTestnetWalletDirectory)){
   fs.mkdirsSync(defaultTestnetWalletDirectory);
 
   // check for existing testnet2 directories
-  if (fs.pathExistsSync(path.join(app.getPath("userData"), "testnet2", "wallet.db"))) {
+  if (fs.pathExistsSync(path.join(appDataDirectory(), "testnet2", "wallet.db"))) {
     fs.mkdirsSync(path.join(defaultTestnetWalletDirectory, "testnet2"));
-    fs.copySync(path.join(app.getPath("userData"), "testnet2"), path.join(defaultTestnetWalletDirectory, "testnet2"));
+    fs.copySync(path.join(appDataDirectory(), "testnet2"), path.join(defaultTestnetWalletDirectory, "testnet2"));
   }
 
   // copy over existing config.json if it exists
-  if (fs.pathExistsSync(path.join(app.getPath("userData"), "config.json"))) {
-    fs.copySync(path.join(app.getPath("userData"), "config.json"), path.join(defaultTestnetWalletDirectory, "config.json"));
+  if (fs.pathExistsSync(path.join(appDataDirectory(), "config.json"))) {
+    fs.copySync(path.join(appDataDirectory(), "config.json"), path.join(defaultTestnetWalletDirectory, "config.json"));
   }
 
   // create new configs for default testnet wallet
@@ -161,7 +166,7 @@ if (err !== null) {
 var globalCfg = initGlobalCfg();
 
 const logger = createLogger(debug);
-logger.log("info", "Using config/data from:" + app.getPath("userData"));
+logger.log("info", "Using config/data from:" + appDataDirectory());
 logger.log("info", "Versions: Decrediton: %s, Electron: %s, Chrome: %s",
   app.getVersion(), process.versions.electron, process.versions.chrome);
 
@@ -541,11 +546,15 @@ const launchDCRWallet = (walletPath, testnet) => {
 
   const cfg = getWalletCfg(testnet, walletPath);
 
-  args.push("--ticketbuyer.balancetomaintainabsolute=" + cfg.get("balancetomaintain"));
-  args.push("--ticketbuyer.maxfee=" + cfg.get("maxfee"));
-  args.push("--ticketbuyer.maxpricerelative=" + cfg.get("maxpricerelative"));
-  args.push("--ticketbuyer.maxpriceabsolute=" + cfg.get("maxpriceabsolute"));
-  args.push("--ticketbuyer.maxperblock=" + cfg.get("maxperblock"));
+  mainWindow.webContents.send("set-custom-config-appdatapath", customAppDataPath);
+
+  if (cfg.get("balancetomaintain") !== undefined) {
+    args.push("--ticketbuyer.balancetomaintainabsolute=" + cfg.get("balancetomaintain"));
+    args.push("--ticketbuyer.maxfee=" + cfg.get("maxfee"));
+    args.push("--ticketbuyer.maxpricerelative=" + cfg.get("maxpricerelative"));
+    args.push("--ticketbuyer.maxpriceabsolute=" + cfg.get("maxpriceabsolute"));
+    args.push("--ticketbuyer.maxperblock=" + cfg.get("maxperblock"));
+  }
 
   var dcrwExe = getExecutablePath("dcrwallet");
   if (!fs.existsSync(dcrwExe)) {

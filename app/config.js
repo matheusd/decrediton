@@ -5,6 +5,11 @@ import { stakePoolInfo } from "./middleware/stakepoolapi";
 import Store from "electron-store";
 import ini from "ini";
 
+export var customAppDataPath;
+export function setCustomAppDataPath(path) {
+  customAppDataPath = path;
+}
+
 export function getGlobalCfg() {
   const config = new Store();
   return (config);
@@ -122,7 +127,9 @@ export function validateGlobalCfgFile() {
 // that was available when using the standalone node but not there when using
 // electron in production mode.
 export function appDataDirectory() {
-  if (os.platform() == "win32") {
+  if (customAppDataPath) {
+    return customAppDataPath;
+  } else if (os.platform() == "win32") {
     return path.join(os.homedir(), "AppData", "Local", "Decrediton");
   } else if (process.platform === "darwin") {
     return path.join(os.homedir(), "Library","Application Support","decrediton");
