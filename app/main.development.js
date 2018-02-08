@@ -546,8 +546,6 @@ const launchDCRWallet = (walletPath, testnet) => {
   args.push("--ticketbuyer.maxpricerelative=" + cfg.get("maxpricerelative"));
   args.push("--ticketbuyer.maxpriceabsolute=" + cfg.get("maxpriceabsolute"));
   args.push("--ticketbuyer.maxperblock=" + cfg.get("maxperblock"));
-  args.push("--rpclistenerevents");
-  args.push("--pipetx=4");
 
   var dcrwExe = getExecutablePath("dcrwallet");
   if (!fs.existsSync(dcrwExe)) {
