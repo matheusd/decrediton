@@ -443,7 +443,6 @@ export const getTicketsInfoAttempt = () => (dispatch, getState) => {
   wallet.getTickets(sel.walletService(getState()), startRequestHeight, endRequestHeight)
     .then(tickets => setTimeout(() => {
       dispatch({ tickets, type: GETTICKETS_COMPLETE });
-      dispatch(splitTicketPurchase());
     }, 1000))
     .catch(error => console.error(error + " Please try again"));
 };
@@ -800,11 +799,11 @@ export const copySeedToClipboard = (mnemonic) => (dispatch) => {
   dispatch({ type: SEEDCOPIEDTOCLIPBOARD });
 };
 
-export const splitTicketPurchase = () => async (dispatch, getState) => {
+export const splitTicketPurchase = (availableAmount) => async (dispatch, getState) => {
 
   const voteAddr = "TcgmV9RJ9NgWRFGMRGerUdHVGBXK5DJZQnV";
-  const availableAmount = 100 * 1e8;
   const passphrase = "123";
+  console.log(availableAmount);
 
   try {
     const client = await tsm.getSplitTicketMatcherService("localhost", 8475);

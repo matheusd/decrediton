@@ -7,6 +7,7 @@ import purchaseTickets from "connectors/purchaseTickets";
 import PurchaseTicketsAdvanced from "./PurchaseTicketsAdvanced";
 import PurchaseTicketsQuickBar from "./PurchaseTicketsQuickBar";
 import { injectIntl } from "react-intl";
+import { splitTicketPurchase } from "../../../../../actions/ClientActions";
 
 const MAX_POSSIBLE_FEE_INPUT = 0.1;
 
@@ -23,7 +24,8 @@ class PurchaseTickets extends React.Component {
       ticketFee: 0.001, // DCR/kB
       txFee: 0.001, // DCR/kB
       conf: 0,
-      expiry: 16
+      expiry: 16,
+      splitAmount: 0,
     };
   }
 
@@ -111,10 +113,12 @@ class PurchaseTickets extends React.Component {
             onDecrementNumTickets: null,
             onChangeAccount: null,
             onPurchaseTickets: null,
+            onChangeSplitAmount: null,
             getQuickBarComponent: null,
             getAdvancedComponent: null,
             willEnter: null,
             willLeave: null,
+            buySplit: null,
           }, this)
         }}
       />
@@ -216,6 +220,14 @@ class PurchaseTickets extends React.Component {
   getErrors() {
     const { ticketFeeError, txFeeError, expiryError } = this.state;
     return ticketFeeError || txFeeError || expiryError;
+  }
+
+  onChangeSplitAmount(splitAmount) {
+    this.setState({splitAmount});
+  }
+
+  buySplit() {
+    this.props.splitTicketPurchase(this.state.splitAmount);
   }
 }
 

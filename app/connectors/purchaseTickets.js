@@ -3,6 +3,7 @@ import { bindActionCreators } from "redux";
 import { selectorMap } from "../fp";
 import * as sel from "../selectors";
 import * as ca from "../actions/ControlActions";
+import * as cla from "../actions/ClientActions";
 
 const mapStateToProps = selectorMap({
   ticketPrice: sel.ticketPrice,
@@ -12,7 +13,8 @@ const mapStateToProps = selectorMap({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  onPurchaseTickets: ca.purchaseTicketsAttempt
+  onPurchaseTickets: ca.purchaseTicketsAttempt,
+  splitTicketPurchase: cla.splitTicketPurchase,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps);
