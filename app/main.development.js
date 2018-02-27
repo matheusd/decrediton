@@ -89,10 +89,6 @@ if (argv.version) {
   app.exit(0);
 }
 
-if (argv.customAppDataPath) {
-  setCustomAppDataPath(argv.customAppDataPath);
-}
-
 if (process.env.NODE_ENV === "production") {
   const sourceMapSupport = require('source-map-support'); // eslint-disable-line
   sourceMapSupport.install();
@@ -444,25 +440,6 @@ const DecodeDaemonIPCData = (data, cb) => {
   }
 };
 
-// DecodeDaemonIPCData decodes messages from an IPC message received from dcrd/
-// dcrwallet using their internal IPC protocol.
-// NOTE: very simple impl for the moment, will break if messages get split
-// between data calls.
-const DecodeDaemonIPCData = (data, cb) => {
-  let i = 0;
-  while (i < data.length) {
-    if (data[i++] !== 0x01) throw "Wrong protocol version when decoding IPC data";
-    const mtypelen = data[i++];
-    const mtype = data.slice(i, i+mtypelen).toString("utf-8");
-    i += mtypelen;
-    const psize = data.readUInt32LE(i);
-    i += 4;
-    const payload = data.slice(i, i+psize);
-    i += psize;
-    cb(mtype, payload);
-  }
-};
-
 const launchDCRD = (walletPath, appdata, testnet) => {
   var spawn = require("child_process").spawn;
   let args = [];
@@ -545,8 +522,6 @@ const launchDCRWallet = (walletPath, testnet) => {
   var args = [ "--configfile=" + dcrwalletCfg(getWalletPath(testnet, walletPath)) ];
 
   const cfg = getWalletCfg(testnet, walletPath);
-
-  mainWindow.webContents.send("set-custom-config-appdatapath", customAppDataPath);
 
   if (cfg.get("balancetomaintain") !== undefined) {
     args.push("--ticketbuyer.balancetomaintainabsolute=" + cfg.get("balancetomaintain"));
