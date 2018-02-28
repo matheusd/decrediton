@@ -44,6 +44,7 @@ service WalletService {
 	rpc ImportPrivateKey (ImportPrivateKeyRequest) returns (ImportPrivateKeyResponse);
 	rpc ImportScript(ImportScriptRequest) returns (ImportScriptResponse);
 	rpc FundTransaction (FundTransactionRequest) returns (FundTransactionResponse);
+	rpc UnspentOutputs (UnspentOutputsRequest) returns (stream UnspentOutputResponse);
 	rpc ConstructTransaction (ConstructTransactionRequest) returns (ConstructTransactionResponse);
 	rpc SignTransaction (SignTransactionRequest) returns (SignTransactionResponse);
 	rpc CreateSignature (CreateSignatureRequest) returns (CreateSignatureResponse);
@@ -56,7 +57,8 @@ service WalletService {
 	rpc ValidateAddress (ValidateAddressRequest) returns (ValidateAddressResponse);
 
 	rpc CreateSplitTicketOutputs(CreateSplitTicketOutputsRequest) returns (CreateSplitTicketOutputsResponse);
-	rpc CreateSplitTicketInput(CreateSplitTicketInputRequest) returns (CreateSplitTicketInputResponse);
+	rpc FundSplitTicket(FundSplitTicketRequest) returns (FundSplitTicketResponse);
+	rpc FundSplitTransaction(FundSplitTransactionRequest) returns (FundSplitTransactionResponse);
 }
 
 service WalletLoaderService {
@@ -382,6 +384,23 @@ message FundTransactionResponse {
 	repeated PreviousOutput selected_outputs = 1;
 	int64 total_amount = 2;
 	bytes change_pk_script = 3;
+}
+
+message UnspentOutputsRequest {
+	uint32 account = 1;
+	int64 target_amount = 2;
+	int32 required_confirmations = 3;
+	bool include_immature_coinbases = 4;
+}
+message UnspentOutputResponse {
+	bytes transaction_hash = 1;
+	uint32 output_index = 2;
+	int64 amount = 3;
+	bytes pk_script = 4;
+	int64 receive_time = 5;
+	bool from_coinbase = 6;
+	int32 tree = 7;
+	int64 amount_sum = 8;
 }
 
 message ConstructTransactionRequest {
@@ -856,8 +875,40 @@ message CreateSplitTicketOutputsResponse {
 		uint64 value = 1;
 		bytes script = 2;
 	}
+	message OutPoint {
+		bytes prev_hash = 1;
+		int32 prev_index = 2;
+	}
 	TxOut commitment_output = 1;
 	TxOut change_output = 2;
+	TxOut split_output = 3;
+	TxOut split_change = 4;
+	repeated OutPoint split_inputs = 5;
+}
+
+message FundSplitTicketRequest {
+	bytes passphrase = 1;
+	bytes ticket = 2;
+	bytes split_tx = 3;
+	bytes split_output_script = 4;
+}
+
+message FundSplitTicketResponse {
+	bytes ticket_input_script_sig = 2;
+}
+
+message FundSplitTransactionRequest {
+	message OutPoint {
+		bytes prev_hash = 1;
+		int32 prev_index = 2;
+	}
+	bytes passphrase = 1;
+	bytes split_tx = 2;
+	repeated OutPoint split_inputs = 3;
+}
+
+message FundSplitTransactionResponse {
+	repeated bytes split_tx_script_sigs = 1;
 }
 
 message CreateSplitTicketInputRequest {

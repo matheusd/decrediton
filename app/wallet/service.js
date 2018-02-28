@@ -9,7 +9,8 @@ import {
   TransactionDetails,
   PublishUnminedTransactionsRequest,
   CreateSplitTicketOutputsRequest,
-  CreateSplitTicketInputRequest,
+  FundSplitTicketRequest,
+  FundSplitTransactionRequest
 } from "middleware/walletrpc/api_pb";
 import { withLog as log, withLogNoData, logOptionNoResponseData } from "./index";
 
@@ -96,7 +97,6 @@ export function formatTransaction(block, transaction, index) {
   const fee = transaction.getFee();
   const type = transaction.getTransactionType();
   let direction = "";
-
 
   let debitAccounts = [];
   transaction.getDebitsList().forEach((debit) => debitAccounts.push(debit.getPreviousAccount()));
@@ -207,12 +207,27 @@ export const createSplitTicketOutputs = log((client, amount, fee) => new Promise
 
 }), "Create Split Ticket Outputs");
 
-export const createSplitTicketInput = log((client, passphrase, ticketTemplate,
-  amount, fees) => new Promise((resolve, reject) => {
-    const req = new CreateSplitTicketInputRequest();
-    req.setPassphrase(new Uint8Array(Buffer.from(passphrase)));
-    req.setTicketTemplate(ticketTemplate);
-    req.setAmount(amount);
-    req.setFees(fees);
-    client.createSplitTicketInput(req, (err, resp) => err ? reject(err) : resolve(resp));
-  }), "Create Split Ticket Input");
+export const fundSplitTicket = log((client, passphrase, ticketTemplate, splitTxTemplate,
+  splitOutputScript) => new Promise((resolve, reject) => {
+  const req = new FundSplitTicketRequest();
+  req.setPassphrase(new Uint8Array(Buffer.from(passphrase)));
+  req.setTicket(ticketTemplate);
+  req.setSplitTx(splitTxTemplate);
+  req.setSplitOutputScript(splitOutputScript);
+  client.fundSplitTicket(req, (err, resp) => err ? reject(err) : resolve(resp));
+}), "Fund Split Ticket");
+
+export const fundSplitTransaction = log((client, passphrase, splitTxTemplate,
+  splitInputs) => new Promise((resolve, reject) => {
+  const req = new FundSplitTransactionRequest();
+  req.setPassphrase(new Uint8Array(Buffer.from(passphrase)));
+  req.setSplitTx(splitTxTemplate);
+  splitInputs.forEach(v => {
+    const outp = new FundSplitTransactionRequest.OutPoint();
+    outp.setPrevHash(v.prevHash);
+    outp.setPrevIndex(v.prevIndex);
+    req.getSplitInputsList().push(outp);
+  });
+  console.log("wallet.fundSplitTx req", req.toObject());
+  client.fundSplitTransaction(req, (err, resp) => err ? reject(err) : resolve(resp));
+}), "Fund Split Transaction");

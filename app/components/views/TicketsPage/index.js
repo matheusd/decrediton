@@ -6,6 +6,7 @@ import { default as PurchaseTab } from "./PurchaseTab";
 import { default as GovernanceTab } from "./GovernanceTab";
 import { default as StatisticsTab } from "./StatisticsTab";
 import { default as MyTicketsTab } from "./MyTicketsTab";
+import { default as SplitTicketTab } from "./SplitTicketTab";
 
 const PageHeader = () =>
   <TitleHeader
@@ -28,5 +29,6 @@ export default () => (
     <Tab path="/tickets/mytickets" component={MyTicketsTab} header={TabHeader} link={<T id="tickets.tab.mytickets" m="My Tickets"/>}/>
     <Tab path="/tickets/governance" component={GovernanceTab} header={TabHeader} link={<T id="tickets.tab.governance" m="Governance"/>}/>
     <Tab path="/tickets/statistics" component={StatisticsTab} header={TabHeader} link={<T id="tickets.tab.statistics" m="Statistics"/>}/>
+    <Tab path="/tickets/split" component={SplitTicketTab} header={TabHeader} link={<T id="tickets.tab.splitTicket" m="Split Ticket"/>}/>
   </TabbedPage>
 );

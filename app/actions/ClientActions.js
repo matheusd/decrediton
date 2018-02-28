@@ -16,6 +16,7 @@ import { clipboard } from "electron";
 import { getStartupStats } from "./StatisticsActions";
 
 import * as tsm from "middleware/grpc/ticketmatcher";
+import { reverseRawHash } from "../helpers/byteActions";
 
 export const GETWALLETSERVICE_ATTEMPT = "GETWALLETSERVICE_ATTEMPT";
 export const GETWALLETSERVICE_FAILED = "GETWALLETSERVICE_FAILED";
@@ -801,9 +802,18 @@ export const copySeedToClipboard = (mnemonic) => (dispatch) => {
 
 export const splitTicketPurchase = (availableAmount) => async (dispatch, getState) => {
 
-  const voteAddr = "TcgmV9RJ9NgWRFGMRGerUdHVGBXK5DJZQnV";
+  const voteAddr = "TcqLUGXsEjb9TvvEA5knLi1oT8dDRofDQHB";
   const passphrase = "123";
+  const { walletService, decodeMessageService } = getState().grpc;
   console.log(availableAmount);
+
+  const debugDecodeRawTx = async (rawTx) => {
+    const hex = Buffer.from(rawTx).toString("hex");
+    const decoded = await wallet.decodeTransaction(decodeMessageService, hex);
+    return decoded.toObject();
+  };
+
+  const debugRawTxToHex = (rawTx) => Buffer.from(rawTx).toString("hex");
 
   try {
     const client = await tsm.getSplitTicketMatcherService("localhost", 8475);
@@ -815,7 +825,6 @@ export const splitTicketPurchase = (availableAmount) => async (dispatch, getStat
     const contrib = await tsm.findMatches(client, availableAmount);
     console.log("contrib", contrib);
 
-    const { walletService, decodeMessageService } = getState().grpc;
     const outputs = await wallet.createSplitTicketOutputs(walletService, contrib.amount,
       contrib.fee);
     console.log("outputs", outputs.toObject());
@@ -824,35 +833,61 @@ export const splitTicketPurchase = (availableAmount) => async (dispatch, getStat
     const commitScript = outputs.getCommitmentOutput().getScript();
     const changeValue = outputs.getChangeOutput().getValue();
     const changeScript = outputs.getChangeOutput().getScript();
+    const splitValue = outputs.getSplitOutput().getValue();
+    const splitScript = outputs.getSplitOutput().getScript();
+    const splitChangeValue = outputs.getSplitChange().getValue();
+    const splitChangeScript = outputs.getSplitChange().getScript();
+    const splitInputs = outputs.getSplitInputsList().map(input => ({
+      prevHash: input.getPrevHash(),
+      prevIndex: input.getPrevIndex(),
+    }));
 
     // console.log("xxx", commitValue, commitScript, changeValue,
-    //   changeScript, voteAddr);
+    //   changeScript, voteAddr, splitValue);
 
     const ticketTempl = await tsm.generateTicket(client, commitValue, commitScript, changeValue,
-      changeScript, voteAddr, contrib.sessionId);
-    console.log("ticket template", ticketTempl.toObject());
+      changeScript, voteAddr, contrib.sessionId, splitValue, splitScript, splitChangeValue, splitChangeScript,
+      splitInputs);
+    console.log("ticket template", await debugDecodeRawTx(ticketTempl.getTicket()));
+    console.log("split tx template", await debugDecodeRawTx(ticketTempl.getSplitTx()));
 
-    const rawTicketTempl = Buffer.from(ticketTempl.getTransaction()).toString("hex");
-    // console.log("raw ticket templ", rawTicketTempl);
-    const decodedTicketTempl = await wallet.decodeTransaction(decodeMessageService, rawTicketTempl);
-    console.log("decoded ticket templ", decodedTicketTempl.toObject());
+    // TODO: make all client-level checks (if my ticket output is present, if it is
+    // on the right indexes, if my split inputs & outputs are present, if the
+    // sum of split tx outputs can generate the ticket, etc)
 
-    const input = await wallet.createSplitTicketInput(walletService, passphrase,
-      ticketTempl.getTransaction(), contrib.amount, contrib.fee);
-    const rawSignedSplitTx = Buffer.from(input.getSplitTx()).toString("hex");
+    const input = await wallet.fundSplitTicket(walletService, passphrase,
+      ticketTempl.getTicket(), ticketTempl.getSplitTx(), splitScript);
+    console.log("Ticket input script sig", input.toObject());
+
+    const fundedTicket = await tsm.fundTicket(client, contrib.sessionId, input.getTicketInputScriptSig());
+    console.log("funded ticket", await debugDecodeRawTx(fundedTicket.getTicket()));
+    console.log("funded ticket hex", debugRawTxToHex(fundedTicket.getTicket()));
+
+    // TODO: make sure the funded ticket is correct (has the right outputs,
+    // input sigs, output commitments, ticket price, etc)
+
+    const splitInputsSigs = await wallet.fundSplitTransaction(walletService, passphrase,
+      ticketTempl.getSplitTx(), splitInputs);
+    console.log("Split Tx input script sigs", splitInputsSigs.toObject());
+
+    const fundedSplit = await tsm.fundSplitTransaction(client, contrib.sessionId,
+      splitInputsSigs.getSplitTxScriptSigsList());
+    console.log("Funded split tx", await debugDecodeRawTx(fundedSplit.getSplitTx()));
+    console.log("Funded split tx hex", debugRawTxToHex(fundedSplit.getSplitTx()));
+
     // const decodedSignedSplitTx = await wallet.decodeTransaction(decodeMessageService, rawSignedSplitTx);
     //console.log("ticket input", input.toObject());
 
-    const ticket = await tsm.publishTicket(client, contrib.sessionId,
-      input.getSplitTx(), input.splitTxOutputIndex, input.getInputScriptsig());
-    // console.log("final ticket", ticket.toObject);
-    const rawFinalTicket = Buffer.from(ticket.getTicketTx()).toString("hex");
-    const decodedFinalTicket = await wallet.decodeTransaction(decodeMessageService, rawFinalTicket);
-    console.log("decoded final ticket", decodedFinalTicket.toObject());
+    // const ticket = await tsm.publishTicket(client, contrib.sessionId,
+    //   input.getSplitTx(), input.splitTxOutputIndex, input.getInputScriptsig());
+    // // console.log("final ticket", ticket.toObject);
+    // const rawFinalTicket = Buffer.from(ticket.getTicketTx()).toString("hex");
+    // const decodedFinalTicket = await wallet.decodeTransaction(decodeMessageService, rawFinalTicket);
+    // console.log("decoded final ticket", decodedFinalTicket.toObject());
 
-    console.log("============ to publish =========");
-    console.log("raw split tx", rawSignedSplitTx);
-    console.log("final raw ticket", rawFinalTicket);
+    // console.log("============ to publish =========");
+    // console.log("raw split tx", rawSignedSplitTx);
+    // console.log("final raw ticket", rawFinalTicket);
 
   } catch (err) {
     console.log("errrrrrr no split ticket purchase", err);

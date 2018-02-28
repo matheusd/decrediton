@@ -1,7 +1,7 @@
 var services = require("../ticketmatcherrpc/api-ticket-matcher_grpc_pb.js");
 import {
   StatusRequest, FindMatchesRequest, GenerateTicketRequest, TxOut,
-  PublishTicketRequest,
+  OutPoint, FundTicketRequest, FundSplitTxRequest,
 } from "../ticketmatcherrpc/api-ticket-matcher_pb.js";
 
 import grpc from "grpc";
@@ -41,33 +41,56 @@ export const findMatches = (client, amount) => new Promise((resolve, reject) => 
 });
 
 export const generateTicket = (client, commitAmount, commitScript, changeAmount,
-  changeScript, voteAddr, sessionID) => new Promise((resolve, reject) => {
+  changeScript, voteAddr, sessionID, splitValue, splitScript, splitChangeValue,
+  splitChangeScript, splitInputs) => new Promise((resolve, reject) => {
 
-    const commitTxOut = new TxOut();
-    commitTxOut.setValue(commitAmount);
-    commitTxOut.setScript(commitScript);
+  const commitTxOut = new TxOut();
+  commitTxOut.setValue(commitAmount);
+  commitTxOut.setScript(commitScript);
 
-    const changeTxOut = new TxOut();
-    changeTxOut.setValue(changeAmount);
-    changeTxOut.setScript(changeScript);
+  const changeTxOut = new TxOut();
+  changeTxOut.setValue(changeAmount);
+  changeTxOut.setScript(changeScript);
 
-    const req = new GenerateTicketRequest();
-    req.setSessionId(sessionID);
-    req.setCommitmentOutput(commitTxOut);
-    req.setChangeOutput(changeTxOut);
-    req.setVoteAddress(voteAddr);
+  const splitTxOut = new TxOut();
+  splitTxOut.setValue(splitValue);
+  splitTxOut.setScript(splitScript);
 
-    client.generateTicket(req, (err, resp) => err ? reject(err) : resolve(resp));
+  const splitChangeTxOut = new TxOut();
+  splitChangeTxOut.setValue(splitChangeValue);
+  splitChangeTxOut.setScript(splitChangeScript);
+
+  const req = new GenerateTicketRequest();
+  req.setSessionId(sessionID);
+  req.setCommitmentOutput(commitTxOut);
+  req.setChangeOutput(changeTxOut);
+  req.setVoteAddress(voteAddr);
+  req.setSplitTxOutput(splitTxOut);
+  req.setSplitTxChange(splitChangeTxOut);
+  splitInputs.forEach(v => {
+    const input = new OutPoint();
+    input.setPrevHash(v.prevHash);
+    input.setPrevIndex(v.prevIndex);
+    req.getSplitTxInputsList().push(input);
   });
+  console.log("xxx req to send", req.toObject());
 
-export const publishTicket = (client, sessionID, splitTx, splitTxOutIndex,
-  ticketInputScriptSig) => new Promise((resolve, reject) => {
+  client.generateTicket(req, (err, resp) => err ? reject(err) : resolve(resp));
+});
 
-    const req = new PublishTicketRequest();
-    req.setSessionId(sessionID);
-    req.setSplitTx(splitTx);
-    req.setSplitTxOutputIndex(splitTxOutIndex);
-    req.setTicketInputScriptsig(ticketInputScriptSig);
+export const fundTicket = (client, sessionID, inputScriptSig) => new Promise((resolve, reject) => {
+  const req = new FundTicketRequest();
+  req.setTicketInputScriptsig(inputScriptSig);
+  req.setSessionId(sessionID);
+  client.fundTicket(req, (err, resp) => err ? reject(err) : resolve(resp));
+});
 
-    client.publishTicket(req, (err, resp) => err ? reject(err) : resolve(resp));
+export const fundSplitTransaction = (client, sessionID, inputScriptSigs) => new Promise((resolve, reject) => {
+  const req = new FundSplitTxRequest();
+  inputScriptSigs.forEach(v => {
+    req.getSplitTxScriptsigsList().push(v);
   });
+  req.setSessionId(sessionID);
+  console.log(req);
+  client.fundSplitTx(req, (err, resp) => err ? reject(err) : resolve(resp));
+});

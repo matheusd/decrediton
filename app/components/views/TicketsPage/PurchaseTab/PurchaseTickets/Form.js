@@ -1,6 +1,6 @@
 import { PurchaseTicketsInfoModalContent, ImportScriptModal } from "modals";
-import { TicketsCogs, InfoModalButton, PassphraseModalButton, KeyBlueButton } from "buttons";
-import { AccountsSelect, NumTicketsInput, DcrInput } from "inputs";
+import { TicketsCogs, InfoModalButton, PassphraseModalButton } from "buttons";
+import { AccountsSelect, NumTicketsInput } from "inputs";
 import { FormattedMessage as T } from "react-intl";
 import { Tooltip } from "shared";
 import { TransitionMotionWrapper } from "shared";
@@ -22,10 +22,7 @@ const PurchaseTicketsForm = ({
   onImportScript,
   onRevokeTickets,
   onToggleShowAdvanced,
-  onChangeSplitAmount,
   account,
-  splitAmount,
-  buySplit,
   willEnter,
   willLeave,
 }) => {
@@ -104,14 +101,6 @@ const PurchaseTicketsForm = ({
           />
         }
       </div>
-
-      <div className="stakepool-purchase-ticket-row-wrapper">
-        <div className="stakepool-purchase-ticket-row">
-          <DcrInput amount={splitAmount} onChangeAmount={onChangeSplitAmount}/>
-          <KeyBlueButton onClick={buySplit}>Split Purchase</KeyBlueButton>
-        </div>
-      </div>
-
     </Aux>);
 };
 
