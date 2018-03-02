@@ -71,9 +71,9 @@ export const generateTicket = (client, commitAmount, commitScript, changeAmount,
     const input = new OutPoint();
     input.setPrevHash(v.prevHash);
     input.setPrevIndex(v.prevIndex);
+    input.setTree(v.tree);
     req.getSplitTxInputsList().push(input);
   });
-  console.log("xxx req to send", req.toObject());
 
   client.generateTicket(req, (err, resp) => err ? reject(err) : resolve(resp));
 });
@@ -91,6 +91,5 @@ export const fundSplitTransaction = (client, sessionID, inputScriptSigs) => new 
     req.getSplitTxScriptsigsList().push(v);
   });
   req.setSessionId(sessionID);
-  console.log(req);
   client.fundSplitTx(req, (err, resp) => err ? reject(err) : resolve(resp));
 });

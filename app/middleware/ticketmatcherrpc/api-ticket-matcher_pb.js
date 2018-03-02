@@ -509,7 +509,8 @@ proto.dcrticketmatcher.OutPoint.prototype.toObject = function(opt_includeInstanc
 proto.dcrticketmatcher.OutPoint.toObject = function(includeInstance, msg) {
   var f, obj = {
     prevHash: msg.getPrevHash_asB64(),
-    prevIndex: jspb.Message.getFieldWithDefault(msg, 2, 0)
+    prevIndex: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    tree: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -554,6 +555,10 @@ proto.dcrticketmatcher.OutPoint.deserializeBinaryFromReader = function(msg, read
       var value = /** @type {number} */ (reader.readInt32());
       msg.setPrevIndex(value);
       break;
+    case 3:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setTree(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -594,6 +599,13 @@ proto.dcrticketmatcher.OutPoint.serializeBinaryToWriter = function(message, writ
   if (f !== 0) {
     writer.writeInt32(
       2,
+      f
+    );
+  }
+  f = message.getTree();
+  if (f !== 0) {
+    writer.writeInt32(
+      3,
       f
     );
   }
@@ -651,6 +663,21 @@ proto.dcrticketmatcher.OutPoint.prototype.getPrevIndex = function() {
 /** @param {number} value */
 proto.dcrticketmatcher.OutPoint.prototype.setPrevIndex = function(value) {
   jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional int32 tree = 3;
+ * @return {number}
+ */
+proto.dcrticketmatcher.OutPoint.prototype.getTree = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/** @param {number} value */
+proto.dcrticketmatcher.OutPoint.prototype.setTree = function(value) {
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -1438,7 +1465,8 @@ proto.dcrticketmatcher.GenerateTicketResponse.prototype.toObject = function(opt_
 proto.dcrticketmatcher.GenerateTicketResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     ticket: msg.getTicket_asB64(),
-    splitTx: msg.getSplitTx_asB64()
+    splitTx: msg.getSplitTx_asB64(),
+    revocation: msg.getRevocation_asB64()
   };
 
   if (includeInstance) {
@@ -1483,6 +1511,10 @@ proto.dcrticketmatcher.GenerateTicketResponse.deserializeBinaryFromReader = func
       var value = /** @type {!Uint8Array} */ (reader.readBytes());
       msg.setSplitTx(value);
       break;
+    case 3:
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setRevocation(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1523,6 +1555,13 @@ proto.dcrticketmatcher.GenerateTicketResponse.serializeBinaryToWriter = function
   if (f.length > 0) {
     writer.writeBytes(
       2,
+      f
+    );
+  }
+  f = message.getRevocation_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
+      3,
       f
     );
   }
@@ -1604,6 +1643,45 @@ proto.dcrticketmatcher.GenerateTicketResponse.prototype.getSplitTx_asU8 = functi
 /** @param {!(string|Uint8Array)} value */
 proto.dcrticketmatcher.GenerateTicketResponse.prototype.setSplitTx = function(value) {
   jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional bytes revocation = 3;
+ * @return {!(string|Uint8Array)}
+ */
+proto.dcrticketmatcher.GenerateTicketResponse.prototype.getRevocation = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * optional bytes revocation = 3;
+ * This is a type-conversion wrapper around `getRevocation()`
+ * @return {string}
+ */
+proto.dcrticketmatcher.GenerateTicketResponse.prototype.getRevocation_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getRevocation()));
+};
+
+
+/**
+ * optional bytes revocation = 3;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getRevocation()`
+ * @return {!Uint8Array}
+ */
+proto.dcrticketmatcher.GenerateTicketResponse.prototype.getRevocation_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getRevocation()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.dcrticketmatcher.GenerateTicketResponse.prototype.setRevocation = function(value) {
+  jspb.Message.setField(this, 3, value);
 };
 
 

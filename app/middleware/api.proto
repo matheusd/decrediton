@@ -878,6 +878,7 @@ message CreateSplitTicketOutputsResponse {
 	message OutPoint {
 		bytes prev_hash = 1;
 		int32 prev_index = 2;
+		int32 tree = 3;
 	}
 	TxOut commitment_output = 1;
 	TxOut change_output = 2;
@@ -901,6 +902,7 @@ message FundSplitTransactionRequest {
 	message OutPoint {
 		bytes prev_hash = 1;
 		int32 prev_index = 2;
+		int32 tree = 3;
 	}
 	bytes passphrase = 1;
 	bytes split_tx = 2;

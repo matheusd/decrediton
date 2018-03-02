@@ -226,8 +226,8 @@ export const fundSplitTransaction = log((client, passphrase, splitTxTemplate,
     const outp = new FundSplitTransactionRequest.OutPoint();
     outp.setPrevHash(v.prevHash);
     outp.setPrevIndex(v.prevIndex);
+    outp.setTree(v.tree);
     req.getSplitInputsList().push(outp);
   });
-  console.log("wallet.fundSplitTx req", req.toObject());
   client.fundSplitTransaction(req, (err, resp) => err ? reject(err) : resolve(resp));
 }), "Fund Split Transaction");

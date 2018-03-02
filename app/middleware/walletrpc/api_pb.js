@@ -28599,7 +28599,8 @@ proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.prototype.toObject = f
 proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.toObject = function(includeInstance, msg) {
   var f, obj = {
     prevHash: msg.getPrevHash_asB64(),
-    prevIndex: jspb.Message.getFieldWithDefault(msg, 2, 0)
+    prevIndex: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    tree: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -28644,6 +28645,10 @@ proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.deserializeBinaryFromR
       var value = /** @type {number} */ (reader.readInt32());
       msg.setPrevIndex(value);
       break;
+    case 3:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setTree(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -28684,6 +28689,13 @@ proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.serializeBinaryToWrite
   if (f !== 0) {
     writer.writeInt32(
       2,
+      f
+    );
+  }
+  f = message.getTree();
+  if (f !== 0) {
+    writer.writeInt32(
+      3,
       f
     );
   }
@@ -28741,6 +28753,21 @@ proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.prototype.getPrevIndex
 /** @param {number} value */
 proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.prototype.setPrevIndex = function(value) {
   jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional int32 tree = 3;
+ * @return {number}
+ */
+proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.prototype.getTree = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/** @param {number} value */
+proto.walletrpc.CreateSplitTicketOutputsResponse.OutPoint.prototype.setTree = function(value) {
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -29589,7 +29616,8 @@ proto.walletrpc.FundSplitTransactionRequest.OutPoint.prototype.toObject = functi
 proto.walletrpc.FundSplitTransactionRequest.OutPoint.toObject = function(includeInstance, msg) {
   var f, obj = {
     prevHash: msg.getPrevHash_asB64(),
-    prevIndex: jspb.Message.getFieldWithDefault(msg, 2, 0)
+    prevIndex: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    tree: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -29634,6 +29662,10 @@ proto.walletrpc.FundSplitTransactionRequest.OutPoint.deserializeBinaryFromReader
       var value = /** @type {number} */ (reader.readInt32());
       msg.setPrevIndex(value);
       break;
+    case 3:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setTree(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -29674,6 +29706,13 @@ proto.walletrpc.FundSplitTransactionRequest.OutPoint.serializeBinaryToWriter = f
   if (f !== 0) {
     writer.writeInt32(
       2,
+      f
+    );
+  }
+  f = message.getTree();
+  if (f !== 0) {
+    writer.writeInt32(
+      3,
       f
     );
   }
@@ -29731,6 +29770,21 @@ proto.walletrpc.FundSplitTransactionRequest.OutPoint.prototype.getPrevIndex = fu
 /** @param {number} value */
 proto.walletrpc.FundSplitTransactionRequest.OutPoint.prototype.setPrevIndex = function(value) {
   jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * optional int32 tree = 3;
+ * @return {number}
+ */
+proto.walletrpc.FundSplitTransactionRequest.OutPoint.prototype.getTree = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/** @param {number} value */
+proto.walletrpc.FundSplitTransactionRequest.OutPoint.prototype.setTree = function(value) {
+  jspb.Message.setField(this, 3, value);
 };
 
 

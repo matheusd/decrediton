@@ -840,6 +840,7 @@ export const splitTicketPurchase = (availableAmount) => async (dispatch, getStat
     const splitInputs = outputs.getSplitInputsList().map(input => ({
       prevHash: input.getPrevHash(),
       prevIndex: input.getPrevIndex(),
+      tree: input.getTree(),
     }));
 
     // console.log("xxx", commitValue, commitScript, changeValue,
@@ -850,6 +851,7 @@ export const splitTicketPurchase = (availableAmount) => async (dispatch, getStat
       splitInputs);
     console.log("ticket template", await debugDecodeRawTx(ticketTempl.getTicket()));
     console.log("split tx template", await debugDecodeRawTx(ticketTempl.getSplitTx()));
+    console.log("revocation template", await debugDecodeRawTx(ticketTempl.getRevocation()));
 
     // TODO: make all client-level checks (if my ticket output is present, if it is
     // on the right indexes, if my split inputs & outputs are present, if the
@@ -861,7 +863,6 @@ export const splitTicketPurchase = (availableAmount) => async (dispatch, getStat
 
     const fundedTicket = await tsm.fundTicket(client, contrib.sessionId, input.getTicketInputScriptSig());
     console.log("funded ticket", await debugDecodeRawTx(fundedTicket.getTicket()));
-    console.log("funded ticket hex", debugRawTxToHex(fundedTicket.getTicket()));
 
     // TODO: make sure the funded ticket is correct (has the right outputs,
     // input sigs, output commitments, ticket price, etc)
@@ -873,7 +874,10 @@ export const splitTicketPurchase = (availableAmount) => async (dispatch, getStat
     const fundedSplit = await tsm.fundSplitTransaction(client, contrib.sessionId,
       splitInputsSigs.getSplitTxScriptSigsList());
     console.log("Funded split tx", await debugDecodeRawTx(fundedSplit.getSplitTx()));
+
     console.log("Funded split tx hex", debugRawTxToHex(fundedSplit.getSplitTx()));
+    console.log("Funded ticket hex", debugRawTxToHex(fundedTicket.getTicket()));
+    console.log("Revocation hex", debugRawTxToHex(ticketTempl.getRevocation()));
 
     // const decodedSignedSplitTx = await wallet.decodeTransaction(decodeMessageService, rawSignedSplitTx);
     //console.log("ticket input", input.toObject());
