@@ -24,16 +24,22 @@ const EmptyDescription = () =>
     <T id="ln.paymentsTab.emptyDescr" m="(empty description)" />
   </div>;
 
-const ExpiryTime = ({ expired, decoded, tsDate }) => (
-  <div className={ expired ? "expiry expired" : "expiry" }>
-    { expired
-      ? <T id="ln.paymentsTab.expired" m="Expired {relTime}"
-        values={ { relTime: <FormattedRelative value={tsDate(decoded.expiry + decoded.timestamp)} /> } }/>
-      : <T id="ln.paymentsTab.expires" m="Expires {relTime}"
-        values={ { relTime: <FormattedRelative value={tsDate(decoded.expiry + decoded.timestamp)} /> } }/>
-    }
-  </div>
-);
+const ExpiryTime = ({ expired, decoded, tsDate }) => {
+  if (decoded.expiry === 0) {
+    return <div className="expirty"></div>;
+  }
+
+  return (
+    <div className={ expired ? "expiry expired" : "expiry" }>
+      { expired
+        ? <T id="ln.paymentsTab.expired" m="Expired {relTime}"
+          values={ { relTime: <FormattedRelative value={tsDate(decoded.expiry + decoded.timestamp)} /> } }/>
+        : <T id="ln.paymentsTab.expires" m="Expires {relTime}"
+          values={ { relTime: <FormattedRelative value={tsDate(decoded.expiry + decoded.timestamp)} /> } }/>
+      }
+    </div>
+  );
+};
 
 const DecodedPayRequest = ({ decoded, tsDate, expired, sendValue, onSendValueChanged }) => (
   <div className="decoded-payreq">

@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import parseArgs from "minimist";
-import { app, BrowserWindow, Menu, dialog } from "electron";
+import { app, BrowserWindow, Menu, dialog, protocol } from "electron";
 import { initGlobalCfg, validateGlobalCfgFile, setMustOpenForm } from "./config";
 import { appLocaleFromElectronLocale, default as locales } from "./i18n/locales";
 import { createLogger, lastLogLine, GetDcrdLogs, GetDcrwalletLogs, GetDcrlndLogs } from "./main_dev/logging";
@@ -437,6 +437,11 @@ app.on("ready", async () => {
         click: () => mainWindow.inspectElement(x, y)
       } ]).popup(mainWindow);
     }
+  });
+
+  protocol.registerStringProtocol("foobar", (req, cb) => {
+    console.log("XXXXXX got foobar proto", req);
+    cb("a-woot!");
   });
 
   const template = initTemplate(mainWindow, locale);

@@ -420,7 +420,8 @@ export const launchDCRLnd = (walletAccount, walletPort, rpcCreds, walletPath,
     "--dcrd.rpcpass="+rpcCreds.rpc_pass,
     "--dcrwallet.grpchost=localhost:"+walletPort,
     "--dcrwallet.certpath="+path.join(walletPath, "rpc.cert"),
-    "--dcrwallet.accountnumber="+walletAccount
+    "--dcrwallet.accountnumber="+walletAccount,
+    "--accept-keysend"
   ];
 
   if (testnet) {

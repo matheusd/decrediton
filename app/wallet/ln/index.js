@@ -165,6 +165,17 @@ export const sendPayment = (payStream, payRequest, value) => {
   payStream.write(req);
 };
 
+export const sendKeySend = (payStream, nodeId, preimage, paymentHash, value) => {
+  const KEYSEND_TYPE = 5482373484;
+
+  const req = new pb.SendRequest();
+  req.setDest(nodeId);
+  req.setAmt(value);
+  req.getDestCustomRecordsMap().set(KEYSEND_TYPE, preimage);
+  req.setPaymentHash(paymentHash);
+  payStream.write(req);
+};
+
 export const connectPeer = (client, node, address) => {
   const request = new pb.ConnectPeerRequest();
   const addr = new pb.LightningAddress();

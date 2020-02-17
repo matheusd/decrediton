@@ -38,6 +38,28 @@ function deserialize_lnrpc_AddInvoiceResponse(buffer_arg) {
   return rpc_pb.AddInvoiceResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_lnrpc_BakeMacaroonRequest(arg) {
+  if (!(arg instanceof rpc_pb.BakeMacaroonRequest)) {
+    throw new Error('Expected argument of type lnrpc.BakeMacaroonRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_lnrpc_BakeMacaroonRequest(buffer_arg) {
+  return rpc_pb.BakeMacaroonRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_lnrpc_BakeMacaroonResponse(arg) {
+  if (!(arg instanceof rpc_pb.BakeMacaroonResponse)) {
+    throw new Error('Expected argument of type lnrpc.BakeMacaroonResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_lnrpc_BakeMacaroonResponse(buffer_arg) {
+  return rpc_pb.BakeMacaroonResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_lnrpc_ChanBackupExportRequest(arg) {
   if (!(arg instanceof rpc_pb.ChanBackupExportRequest)) {
     throw new Error('Expected argument of type lnrpc.ChanBackupExportRequest');
@@ -434,6 +456,28 @@ function deserialize_lnrpc_ForwardingHistoryResponse(buffer_arg) {
   return rpc_pb.ForwardingHistoryResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_lnrpc_FundingStateStepResp(arg) {
+  if (!(arg instanceof rpc_pb.FundingStateStepResp)) {
+    throw new Error('Expected argument of type lnrpc.FundingStateStepResp');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_lnrpc_FundingStateStepResp(buffer_arg) {
+  return rpc_pb.FundingStateStepResp.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_lnrpc_FundingTransitionMsg(arg) {
+  if (!(arg instanceof rpc_pb.FundingTransitionMsg)) {
+    throw new Error('Expected argument of type lnrpc.FundingTransitionMsg');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_lnrpc_FundingTransitionMsg(buffer_arg) {
+  return rpc_pb.FundingTransitionMsg.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_lnrpc_GenSeedRequest(arg) {
   if (!(arg instanceof rpc_pb.GenSeedRequest)) {
     throw new Error('Expected argument of type lnrpc.GenSeedRequest');
@@ -784,6 +828,28 @@ function serialize_lnrpc_PaymentHash(arg) {
 
 function deserialize_lnrpc_PaymentHash(buffer_arg) {
   return rpc_pb.PaymentHash.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_lnrpc_PeerEvent(arg) {
+  if (!(arg instanceof rpc_pb.PeerEvent)) {
+    throw new Error('Expected argument of type lnrpc.PeerEvent');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_lnrpc_PeerEvent(buffer_arg) {
+  return rpc_pb.PeerEvent.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_lnrpc_PeerEventSubscription(arg) {
+  if (!(arg instanceof rpc_pb.PeerEventSubscription)) {
+    throw new Error('Expected argument of type lnrpc.PeerEventSubscription');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_lnrpc_PeerEventSubscription(buffer_arg) {
+  return rpc_pb.PeerEventSubscription.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_lnrpc_PendingChannelsRequest(arg) {
@@ -1401,6 +1467,21 @@ var LightningService = exports.LightningService = {
     responseSerialize: serialize_lnrpc_ListPeersResponse,
     responseDeserialize: deserialize_lnrpc_ListPeersResponse,
   },
+  // *
+  // SubscribePeerEvents creates a uni-directional stream from the server to
+  // the client in which any events relevant to the state of peers are sent
+  // over. Events include peers going online and offline.
+  subscribePeerEvents: {
+    path: '/lnrpc.Lightning/SubscribePeerEvents',
+    requestStream: false,
+    responseStream: true,
+    requestType: rpc_pb.PeerEventSubscription,
+    responseType: rpc_pb.PeerEvent,
+    requestSerialize: serialize_lnrpc_PeerEventSubscription,
+    requestDeserialize: deserialize_lnrpc_PeerEventSubscription,
+    responseSerialize: serialize_lnrpc_PeerEvent,
+    responseDeserialize: deserialize_lnrpc_PeerEvent,
+  },
   // * lncli: `getinfo`
   // GetInfo returns general information concerning the lightning node including
   // it's identity pubkey, alias, the chains it is connected to, and information
@@ -1499,7 +1580,10 @@ var LightningService = exports.LightningService = {
   // request to a remote peer. Users are able to specify a target number of
   // blocks that the funding transaction should be confirmed in, or a manual fee
   // rate to us for the funding transaction. If neither are specified, then a
-  // lax block confirmation target is used.
+  // lax block confirmation target is used. Each OpenStatusUpdate will return
+  // the pending channel ID of the in-progress channel. Depending on the
+  // arguments specified in the OpenChannelRequest, this pending channel ID can
+  // then be used to manually progress the channel funding flow.
   openChannel: {
     path: '/lnrpc.Lightning/OpenChannel',
     requestStream: false,
@@ -1510,6 +1594,26 @@ var LightningService = exports.LightningService = {
     requestDeserialize: deserialize_lnrpc_OpenChannelRequest,
     responseSerialize: serialize_lnrpc_OpenStatusUpdate,
     responseDeserialize: deserialize_lnrpc_OpenStatusUpdate,
+  },
+  // *
+  // FundingStateStep is an advanced funding related call that allows the caller
+  // to either execute some preparatory steps for a funding workflow, or
+  // manually progress a funding workflow. The primary way a funding flow is
+  // identified is via its pending channel ID. As an example, this method can be
+  // used to specify that we're expecting a funding flow for a particular
+  // pending channel ID, for which we need to use specific parameters.
+  // Alternatively, this can be used to interactively drive PSBT signing for
+  // funding for partially complete funding transactions.
+  fundingStateStep: {
+    path: '/lnrpc.Lightning/FundingStateStep',
+    requestStream: false,
+    responseStream: false,
+    requestType: rpc_pb.FundingTransitionMsg,
+    responseType: rpc_pb.FundingStateStepResp,
+    requestSerialize: serialize_lnrpc_FundingTransitionMsg,
+    requestDeserialize: deserialize_lnrpc_FundingTransitionMsg,
+    responseSerialize: serialize_lnrpc_FundingStateStepResp,
+    responseDeserialize: deserialize_lnrpc_FundingStateStepResp,
   },
   // *
   // ChannelAcceptor dispatches a bi-directional streaming RPC in which
@@ -1679,9 +1783,9 @@ var LightningService = exports.LightningService = {
   // notifying the client of newly added/settled invoices. The caller can
   // optionally specify the add_index and/or the settle_index. If the add_index
   // is specified, then we'll first start by sending add invoice events for all
-  // invoices with an add_index greater than the specified value.  If the
+  // invoices with an add_index greater than the specified value. If the
   // settle_index is specified, the next, we'll send out all settle events for
-  // invoices with a settle_index greater than the specified value.  One or both
+  // invoices with a settle_index greater than the specified value. One or both
   // of these fields can be set. If no fields are set, then we'll only send out
   // the latest add/settle events.
   subscribeInvoices: {
@@ -1740,7 +1844,7 @@ var LightningService = exports.LightningService = {
   // DescribeGraph returns a description of the latest graph state from the
   // point of view of the node. The graph information is partitioned into two
   // components: all the nodes/vertexes, and all the edges that connect the
-  // vertexes themselves.  As this is a directed graph, the edges also contain
+  // vertexes themselves. As this is a directed graph, the edges also contain
   // the node directional specific routing policy which includes: the time lock
   // delta, fee information, etc.
   describeGraph: {
@@ -1899,7 +2003,7 @@ var LightningService = exports.LightningService = {
   //
   // A list of forwarding events are returned. The size of each forwarding event
   // is 40 bytes, and the max message size able to be returned in gRPC is 4 MiB.
-  // As a result each message can only contain 50k entries.  Each response has
+  // As a result each message can only contain 50k entries. Each response has
   // the index offset of the last entry. The index offset can be provided to the
   // request to allow the caller to skip a series of records.
   forwardingHistory: {
@@ -1997,6 +2101,21 @@ var LightningService = exports.LightningService = {
     requestDeserialize: deserialize_lnrpc_ChannelBackupSubscription,
     responseSerialize: serialize_lnrpc_ChanBackupSnapshot,
     responseDeserialize: deserialize_lnrpc_ChanBackupSnapshot,
+  },
+  // * lncli: `bakemacaroon`
+  // BakeMacaroon allows the creation of a new macaroon with custom read and
+  // write permissions. No first-party caveats are added since this can be done
+  // offline.
+  bakeMacaroon: {
+    path: '/lnrpc.Lightning/BakeMacaroon',
+    requestStream: false,
+    responseStream: false,
+    requestType: rpc_pb.BakeMacaroonRequest,
+    responseType: rpc_pb.BakeMacaroonResponse,
+    requestSerialize: serialize_lnrpc_BakeMacaroonRequest,
+    requestDeserialize: deserialize_lnrpc_BakeMacaroonRequest,
+    responseSerialize: serialize_lnrpc_BakeMacaroonResponse,
+    responseDeserialize: deserialize_lnrpc_BakeMacaroonResponse,
   },
 };
 

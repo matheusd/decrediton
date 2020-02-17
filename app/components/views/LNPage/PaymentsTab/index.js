@@ -41,10 +41,15 @@ class PaymentsTab extends React.Component {
       return;
     }
     this.props.decodePayRequest(this.state.payRequest).then(resp => {
-      const timeToExpire = (resp.timestamp + resp.expiry) * 1000 - Date.now();
-      const expired = timeToExpire < 0;
-      if (!expired) {
-        this.props.setTimeout(this.checkExpired, timeToExpire + 1000);
+      let expired = false;
+      let timeToExpire;
+
+      if (resp.expiry) {
+        timeToExpire = (resp.timestamp + resp.expiry) * 1000 - Date.now();
+        expired = timeToExpire < 0;
+        if (!expired) {
+          this.props.setTimeout(this.checkExpired, timeToExpire + 1000);
+        }
       }
       this.setState({ decodedPayRequest: resp, decodingError: null, expired });
     }).catch(error => {

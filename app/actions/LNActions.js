@@ -198,7 +198,7 @@ export const waitForDcrlndSynced = (lnClient) => async () => {
 
   for (let i = 0; i < sleepCount; i++) {
     const info = await ln.getInfo(lnClient);
-    if (info.syncedToChain) {
+    if (info.serverActive && info.syncedToChain) {
       sleep(); // Final sleep to let subsystems catch up.
       return;
     }
@@ -427,8 +427,13 @@ const subscribeToInvoices = () => (dispatch, getState) => {
     setTimeout(() => dispatch(updateChannelList()), 1000);
   });
 
-  sub.on("close", () => {
+  sub.on("close", (...args) => {
     // TODO: implement this to attempt and re-open the subscription.
+    console.log("Payment stream closed", args);
+  });
+
+  sub.on("error", error => {
+    console.log("Payment stream error", error);
   });
 };
 
@@ -451,10 +456,31 @@ export const subscribeChannelEvents = () => (dispatch, getState) => {
   });
 };
 
+const decodeKeySendPayreq = payReq => {
+  const nodeId = payReq.substring(10);
+  if (nodeId.length != 66) {
+    throw new Error("Invalid length for node ID (requires 33 bytes in hex format)");
+  }
+
+  return {
+    description: "Keysend to node " + nodeId,
+    destination: nodeId,
+    dest: new Uint8Array(Buffer.from(nodeId, "hex")),
+    paymentHash: "",
+    timestamp: Date.now(),
+    expiry: 0,
+    keysend: true
+  };
+};
+
 export const decodePayRequest = payReq => async (dispatch, getState) => {
   const client = getState().ln.client;
   if (!client) {
     throw new Error("not connected to a ln wallet");
+  }
+
+  if (payReq.indexOf("lnkeysend1") == 0) {
+    return decodeKeySendPayreq(payReq);
   }
 
   return await ln.decodePayReq(client, payReq);
@@ -478,6 +504,7 @@ const createPaymentStream = () => async (dispatch, getState) => {
   payStream = ln.createPayStream(client);
   payStream.on("data", payData => {
     const pay = payData.toObject();
+    console.log("XXXX payStream onData", pay);
 
     // Look for outstanding payment requests send in the current wallet
     // session. If there are, notify waiting instances whether this payment
@@ -507,10 +534,39 @@ const createPaymentStream = () => async (dispatch, getState) => {
   dispatch({ payStream, type: LNWALLET_PAYSTREAM_CREATED });
 };
 
+const sendKeySend = (payReq, value) => async (dispatch, getState) => {
+  if (value <= 0) {
+    throw new Error("Key send amount cannot be <= 0");
+  }
+  const { payStream } = getState().ln;
+
+  const decoded = decodeKeySendPayreq(payReq);
+
+  const preimage = new Uint8Array(32);
+  window.crypto.getRandomValues(preimage);
+  const rhash = await window.crypto.subtle.digest("SHA-256", preimage);
+  const rhashHex = Buffer.from(rhash).toString("hex");
+  const rhashUint = new Uint8Array(Buffer.from(rhash));
+
+  return new Promise((resolve, reject) => {
+    const payData = { resolve, reject, decoded };
+    dispatch({ payReq, payData, rhashHex, type: LNWALLET_SENDPAYMENT_ATTEMPT });
+    try {
+      ln.sendKeySend(payStream, decoded.dest, preimage, rhashUint, value);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 export const sendPayment = (payReq, value) => (dispatch, getState) => {
   const { payStream, client } = getState().ln;
   if (!payStream) {
     throw new Error("payment stream not created");
+  }
+
+  if (payReq.indexOf("lnkeysend1") == 0) {
+    return dispatch(sendKeySend(payReq, value));
   }
 
   return new Promise((resolve, reject) => {
