@@ -125,15 +125,15 @@ export default function ln(state = {}, action) {
       payStream: action.payStream
     };
   case LNWALLET_DECODEPAYREQ_ATTEMPT:
-      return {
-        ...state,
-        payRequest: action.payRequest,
-      }
+    return {
+      ...state,
+      payRequest: action.payRequest
+    };
   case LNWALLET_START_SENDPAYMENT:
-      return {
-        ...state,
-        payRequest: action.payRequest,
-      }
+    return {
+      ...state,
+      payRequest: action.payRequest
+    };
   case LNWALLET_SENDPAYMENT_ATTEMPT:
     return {
       ...state,

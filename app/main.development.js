@@ -454,11 +454,11 @@ app.on("ready", async () => {
   Menu.setApplicationMenu(menu);
 });
 
-app.on("second-instance", (e, args2, cwd) => {
+app.on("second-instance", (e, args2) => {
   logger.log("info", "Second instance signalled with args " + JSON.stringify(args2));
   const argv2 = parseArgs(args2, OPTIONS);
   mainWindow.webContents.send("second-instance-signalled", argv2);
-  const focus = isString(argv2.lnkeysend)
+  const focus = isString(argv2.lnkeysend);
   if (focus) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore();

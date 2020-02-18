@@ -29,8 +29,7 @@ class PaymentsTab extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    console.log("XXXXXX got componentDidUpdate", this.props.payRequest, prevProps.payRequest);
+  componentDidUpdate(prevProps) {
     const loadFromPropsPayReq =
         prevProps.payRequest != this.props.payRequest &&
         this.props.payRequest;
@@ -43,7 +42,7 @@ class PaymentsTab extends React.Component {
         expired: false,
 
         // FIXME: remove. This should come from the keysend invoice
-        sendValueAtom: 100000,
+        sendValueAtom: 100000
       });
       if (this.lastDecodeTimer) {
         this.props.clearTimeout(this.lastDecodeTimer);

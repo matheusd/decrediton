@@ -1317,10 +1317,10 @@ export const secondInstanceSignalled = argv => (dispatch, getState) => {
 
   if (argv.lnkeysend && isString(argv.lnkeysend)) {
     if (sel.lnActive(getState())) {
-      const keysendInvoice = argv.lnkeysend.substr("dcrlnkeysend://".length)
+      const keysendInvoice = argv.lnkeysend.substr("dcrlnkeysend://".length);
       dispatch(startLNPayment(keysendInvoice));
     } else {
       dispatch({ type: SECONDINSTANCE_LNKEYSEND_NOLNWALLET });
     }
   }
-}
+};

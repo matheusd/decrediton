@@ -540,9 +540,9 @@ const createPaymentStream = () => async (dispatch, getState) => {
 
 export const LNWALLET_START_SENDPAYMENT = "LNWALLET_START_SENDPAYMENT";
 export const startLNPayment = payReq => (dispatch) => {
-      dispatch({ payRequest: payReq, type: LNWALLET_START_SENDPAYMENT });
-      dispatch(pushHistory("/ln/payments"));
-}
+  dispatch({ payRequest: payReq, type: LNWALLET_START_SENDPAYMENT });
+  dispatch(pushHistory("/ln/payments"));
+};
 
 const sendKeySend = (payReq, value) => async (dispatch, getState) => {
   if (value <= 0) {
