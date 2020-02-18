@@ -38,9 +38,14 @@ function countDecimalDigits(s) {
 class DcrInput extends React.Component {
   constructor(props) {
     super(props);
+    let decimalDigits = 0;
+    if (props.amount && props.unitDivisor !== 1) {
+      decimalDigits = Math.trunc(Math.log10(props.amount))
+    }
+
     this.state = {
       decimal: false,
-      decimalDigits: 0
+      decimalDigits: decimalDigits,
     };
   }
 
