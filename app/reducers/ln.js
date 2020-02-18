@@ -7,6 +7,7 @@ import {
   LNWALLET_ADDINVOICE_ATTEMPT, LNWALLET_ADDINVOICE_SUCCESS, LNWALLET_ADDINVOICE_FAILED,
   LNWALLET_INVOICE_SETTLED, LNWALLET_INVOICE_OPENED, LNWALLET_INVOICE_EXPIRED,
   LNWALLET_PAYSTREAM_CREATED,
+  LNWALLET_START_SENDPAYMENT, LNWALLET_DECODEPAYREQ_ATTEMPT,
   LNWALLET_SENDPAYMENT_ATTEMPT, LNWALLET_SENDPAYMENT_SUCCESS,
   LNWALLET_DCRLND_STOPPED,
   LNWALLET_CHECKED
@@ -123,15 +124,27 @@ export default function ln(state = {}, action) {
       ...state,
       payStream: action.payStream
     };
+  case LNWALLET_DECODEPAYREQ_ATTEMPT:
+      return {
+        ...state,
+        payRequest: action.payRequest,
+      }
+  case LNWALLET_START_SENDPAYMENT:
+      return {
+        ...state,
+        payRequest: action.payRequest,
+      }
   case LNWALLET_SENDPAYMENT_ATTEMPT:
     return {
       ...state,
+      payRequest: null,
       outstandingPayments: addOutstandingPayment(state.outstandingPayments,
         action.rhashHex, action.payData)
     };
   case LNWALLET_SENDPAYMENT_SUCCESS:
     return {
       ...state,
+      payRequest: null,
       outstandingPayments: delOutstandingPayment(state.outstandingPayments,
         action.rhashHex)
     };
@@ -147,6 +160,7 @@ export default function ln(state = {}, action) {
       payStream: null,
       payments: [],
       invoices: [],
+      payRequest: null,
       info: {
         version: null,
         identityPubkey: null,

@@ -10,7 +10,7 @@ function unknownFn(arg) {
 // Allowed cmd line options are defined here.
 export const OPTIONS = {
   boolean: [ "debug", "testnet", "mainnet", "help", "version", "advanced", "spv" ],
-  string: [ "extrawalletargs", "custombinpath", "spvconnect", "rpcuser", "rpcpass", "rpccert", "rpcconnect" ],
+  string: [ "extrawalletargs", "custombinpath", "spvconnect", "rpcuser", "rpcpass", "rpccert", "rpcconnect", "lnkeysend" ],
   default: { debug: false },
   alias: {
     d: "debug",

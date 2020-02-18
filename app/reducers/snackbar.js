@@ -30,7 +30,8 @@ import {
 import {
   NEW_TRANSACTIONS_RECEIVED,
   GETSTARTUPWALLETINFO_FAILED,
-  SEEDCOPIEDTOCLIPBOARD
+  SEEDCOPIEDTOCLIPBOARD,
+  SECONDINSTANCE_LNKEYSEND_NOLNWALLET
 } from "../actions/ClientActions";
 import { SNACKBAR_DISMISS_MESSAGES, SNACKBAR_SIMPLE_MESSAGE } from "../actions/SnackbarActions";
 import {
@@ -367,6 +368,10 @@ const messages = defineMessages({
   UPDATEVOTECHOICE_SUCCESS: {
     id: "governance.ntf.updateVoteChoiceSuccess",
     defaultMessage: "Your vote has been casted with success!\n Thanks for participating in decred's governance"
+  },
+  SECONDINSTANCE_LNKEYSEND_NOLNWALLET: {
+    id: "secondinstance.lnKeysendNoLNWallet",
+    defaultMessage: "LN wallet isn't open"
   }
 });
 
@@ -509,6 +514,7 @@ export default function snackbar(state = {}, action) {
   case LNWALLET_FUNDWALLET_FAILED:
   case LNWALLET_WITHDRAWWALLET_FAILED:
   case LNWALLET_STARTDCRLND_FAILED:
+  case SECONDINSTANCE_LNKEYSEND_NOLNWALLET:
     type = "Error";
     if (action.error && String(action.error).indexOf("wallet.Unlock: invalid passphrase:: secretkey.DeriveKey") > -1) {
       // intercepting all wrong passphrase errors, independently of which error

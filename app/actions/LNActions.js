@@ -5,6 +5,7 @@ import { ipcRenderer } from "electron";
 import { getWalletCfg } from "../config";
 import { getWalletPath } from "main_dev/paths";
 import { getNextAccountAttempt } from "./ControlActions";
+import { push as pushHistory } from "react-router-redux";
 
 export const CLOSETYPE_COOPERATIVE_CLOSE = 0;
 export const CLOSETYPE_LOCAL_FORCE_CLOSE = 1;
@@ -473,11 +474,14 @@ const decodeKeySendPayreq = payReq => {
   };
 };
 
+export const LNWALLET_DECODEPAYREQ_ATTEMPT = "LNWALLET_DECODEPAYREQ_ATTEMPT";
 export const decodePayRequest = payReq => async (dispatch, getState) => {
   const client = getState().ln.client;
   if (!client) {
     throw new Error("not connected to a ln wallet");
   }
+
+  dispatch({ payRequest: payReq, type: LNWALLET_DECODEPAYREQ_ATTEMPT });
 
   if (payReq.indexOf("lnkeysend1") == 0) {
     return decodeKeySendPayreq(payReq);
@@ -533,6 +537,12 @@ const createPaymentStream = () => async (dispatch, getState) => {
 
   dispatch({ payStream, type: LNWALLET_PAYSTREAM_CREATED });
 };
+
+export const LNWALLET_START_SENDPAYMENT = "LNWALLET_START_SENDPAYMENT";
+export const startLNPayment = payReq => (dispatch) => {
+      dispatch({ payRequest: payReq, type: LNWALLET_START_SENDPAYMENT });
+      dispatch(pushHistory("/ln/payments"));
+}
 
 const sendKeySend = (payReq, value) => async (dispatch, getState) => {
   if (value <= 0) {

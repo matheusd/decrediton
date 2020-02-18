@@ -27,6 +27,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   hideAboutModalMacOS: ca.hideAboutModalMacOS,
   showAutobuyerRunningModal: ca.showAutobuyerRunningModal,
   hideAutobuyerRunningModal: ca.hideAutobuyerRunningModal,
+  secondInstanceSignalled: cla.secondInstanceSignalled,
   onExpandSideBar: sba.expandSideBar,
   onReduceSideBar: sba.reduceSideBar,
   onSidebarToBottom: sba.sidebarToBottom,

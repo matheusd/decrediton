@@ -445,7 +445,8 @@ var initialState = {
     invoices: Array(),
     payments: Array(),
     addInvoiceAttempt: false,
-    sendPaymentAttempt: false
+    sendPaymentAttempt: false,
+    payRequest: null,
   },
   locales: locales
 };

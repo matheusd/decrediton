@@ -70,6 +70,9 @@ class App extends React.Component {
         this.props.shutdownApp();
       }
     });
+    ipcRenderer.on("second-instance-signalled", (e, argv) => {
+      this.props.secondInstanceSignalled(argv);
+    });
   }
 
   onClick(event) {

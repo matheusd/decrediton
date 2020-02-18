@@ -2,11 +2,12 @@
 import * as wallet from "wallet";
 import * as sel from "selectors";
 import eq from "lodash/fp/eq";
+import { isString } from "fp";
 import { getNextAddressAttempt, publishUnminedTransactionsAttempt } from "./ControlActions";
 import { transactionNtfnsStart, accountNtfnsStart } from "./NotificationActions";
 import { refreshStakepoolPurchaseInformation, setStakePoolVoteChoices, getStakepoolStats } from "./StakePoolActions";
 import { getDecodeMessageServiceAttempt } from "./DecodeMessageActions";
-import { checkLnWallet } from "./LNActions";
+import { checkLnWallet, startLNPayment } from "./LNActions";
 import { push as pushHistory, goBack } from "react-router-redux";
 import { getWalletCfg, getGlobalCfg } from "config";
 import { onAppReloadRequested } from "wallet";
@@ -1307,3 +1308,19 @@ export const RESET_TREASURY_BALANCE = "RESET_TREASURY_BALANCE";
 export const resetTreasuryBalance = () => (dispatch) => {
   dispatch({ type: RESET_TREASURY_BALANCE });
 };
+
+export const SECONDINSTANCE_SIGNALLED = "SECONDINSTANCE_SIGNALLED";
+export const SECONDINSTANCE_LNKEYSEND_NOLNWALLET = "SECONDINSTANCE_LNKEYSEND_NOLNWALLET";
+
+export const secondInstanceSignalled = argv => (dispatch, getState) => {
+  dispatch({ argv, type: SECONDINSTANCE_SIGNALLED });
+
+  if (argv.lnkeysend && isString(argv.lnkeysend)) {
+    if (sel.lnActive(getState())) {
+      const keysendInvoice = argv.lnkeysend.substr("dcrlnkeysend://".length)
+      dispatch(startLNPayment(keysendInvoice));
+    } else {
+      dispatch({ type: SECONDINSTANCE_LNKEYSEND_NOLNWALLET });
+    }
+  }
+}

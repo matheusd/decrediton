@@ -15,12 +15,41 @@ class PaymentsTab extends React.Component {
     super(props);
     this.state = {
       sendValueAtom: 0,
-      payRequest: "",
+      payRequest: props.payRequest,
       decodedPayRequest: null,
       decodingError: null,
       expired: false
     };
     this.lastDecodeTimer = null;
+    if (props.payRequest) {
+      this.lastDecodeTimer = this.props.setTimeout(this.decodePayRequest, 1000);
+
+      // FIXME: This should come from the ln keysend invoice.
+      this.state.sendValueAtom = 100000;
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    console.log("XXXXXX got componentDidUpdate", this.props.payRequest, prevProps.payRequest);
+    const loadFromPropsPayReq =
+        prevProps.payRequest != this.props.payRequest &&
+        this.props.payRequest;
+
+    if (loadFromPropsPayReq) {
+      this.setState({
+        payRequest: this.props.payRequest,
+        decodedPayRequest: null,
+        decodingError: null,
+        expired: false,
+
+        // FIXME: remove. This should come from the keysend invoice
+        sendValueAtom: 100000,
+      });
+      if (this.lastDecodeTimer) {
+        this.props.clearTimeout(this.lastDecodeTimer);
+      }
+      this.lastDecodeTimer = this.props.setTimeout(this.decodePayRequest, 1000);
+    }
   }
 
   checkExpired() {

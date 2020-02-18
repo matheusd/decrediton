@@ -340,6 +340,10 @@ ipcMain.on("get-cli-options", (event) => {
 
 primaryInstance = app.requestSingleInstanceLock();
 const stopSecondInstance = !primaryInstance && !daemonIsAdvanced;
+if (stopSecondInstance && isString(argv.lnkeysend)) {
+  logger.log("info", "Second instance is lnkeysend event so returning before opening wallet.");
+  process.exit(0);
+}
 if (stopSecondInstance) {
   logger.log("error", "Preventing second instance from running.");
 }
@@ -448,6 +452,19 @@ app.on("ready", async () => {
 
   menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
+});
+
+app.on("second-instance", (e, args2, cwd) => {
+  logger.log("info", "Second instance signalled with args " + JSON.stringify(args2));
+  const argv2 = parseArgs(args2, OPTIONS);
+  mainWindow.webContents.send("second-instance-signalled", argv2);
+  const focus = isString(argv2.lnkeysend)
+  if (focus) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    mainWindow.show();
+  }
 });
 
 app.on("before-quit", (event) => {
