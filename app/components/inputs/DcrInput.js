@@ -40,12 +40,12 @@ class DcrInput extends React.Component {
     super(props);
     let decimalDigits = 0;
     if (props.amount && props.unitDivisor !== 1) {
-      decimalDigits = Math.trunc(Math.log10(props.amount))
+      decimalDigits = Math.trunc(Math.log10(props.amount));
     }
 
     this.state = {
       decimal: false,
-      decimalDigits: decimalDigits,
+      decimalDigits: decimalDigits
     };
   }
 
