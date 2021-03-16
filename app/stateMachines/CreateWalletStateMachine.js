@@ -107,8 +107,11 @@ export const CreateWalletMachine = Machine({
           actions: [
             assign({
               passPhrase: "",
-              seed: (context, { isTestNet }) =>
-                isTestNet && context.seed ? context.seed : [],
+              seed: (context, data) => {
+                console.log("XXXXXXX", data);
+                const { isTestNet }  = data;
+                return isTestNet && context.seed ? context.seed : [];
+              },
               error: ""
             })
           ]

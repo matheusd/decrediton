@@ -689,8 +689,10 @@ export const launchDCRLnd = (
     const adminMacaroonPath = path.join(dcrlndRoot, "admin.macaroon");
 
     const args = [
+      "--simnet",
       "--nolisten",
       "--norest",
+      "--debuglevel=debug",
       "--logdir=" + path.join(dcrlndRoot, "logs"),
       "--datadir=" + path.join(dcrlndRoot, "data"),
       "--tlscertpath=" + tlsCertPath,

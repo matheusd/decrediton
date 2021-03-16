@@ -12,6 +12,8 @@ import NetworkTab from "./NetworkTab/NetworkTab";
 import WatchtowersTab from "./WatchtowersTab/WatchtowersTab";
 import WatchtowersTabHeader from "./WatchtowersTab/WatchtowersTabHeader";
 import "style/Documentation.less";
+import MrttreeTab from "./MrttreeTab/MrttreeTab";
+import MrttreeTabHeader from "./MrttreeTab/MrttreeTabHeader";
 
 const LNPageHeader = () => (
   <TitleHeader
@@ -60,6 +62,12 @@ const LNActivePage = () => (
       component={WatchtowersTab}
       header={WatchtowersTabHeader}
       link={<T id="ln.tab.watchtowers" m="Watchtowers" />}
+    />
+    <Tab
+      path="/ln/mrttree"
+      component={MrttreeTab}
+      header={MrttreeTabHeader}
+      link={<T id="ln.tab.mrttree" m="MRTTREE" />}
     />
   </TabbedPage>
 );

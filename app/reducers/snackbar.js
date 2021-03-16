@@ -412,7 +412,7 @@ const messages = defineMessages({
   },
   LNWALLET_INVOICE_SETTLED: {
     id: "ln.ntf.invoiceSettled",
-    defaultMessage: "Invoice '{memo}' settled!"
+    defaultMessage: "Invoice \"{memo}\" settled!"
   },
   LNWALLET_SENDPAYMENT_FAILED: {
     id: "ln.ntf.sendPaymentFailed",
@@ -637,8 +637,10 @@ export default function snackbar(state = {}, action) {
           break;
         case LNWALLET_INVOICE_SETTLED:
           values = { memo: action.invoice.memo };
+          break;
         case LNWALLET_EXPORTBACKUP_SUCCESS:
           values = { destPath: action.destPath };
+          break;
       }
 
       break;

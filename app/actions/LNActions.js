@@ -923,12 +923,16 @@ const getScbInfo = () => async (dispatch, getState) => {
     daemon: { walletName }
   } = getState();
   const walletPath = getWalletPath(sel.network(getState()), walletName);
-  const scbInfo = await ln.scbInfo(walletPath, isTestnet);
-  dispatch({
-    scbPath: scbInfo.channelBackupPath,
-    scbUpdatedTime: scbInfo.channelBackupMTime,
-    type: LNWALLET_SCBINFO_UPDATED
-  });
+  try {
+    const scbInfo = await ln.scbInfo(walletPath, isTestnet);
+    dispatch({
+      scbPath: scbInfo.channelBackupPath,
+      scbUpdatedTime: scbInfo.channelBackupMTime,
+      type: LNWALLET_SCBINFO_UPDATED
+    });
+  } catch (error) {
+    console.log("err", error);
+}
 };
 
 export const LNWALLET_EXPORTBACKUP_SUCCESS = "LNWALLET_EXPORTBACKUP_SUCCESS";

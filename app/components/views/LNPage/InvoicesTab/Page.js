@@ -13,7 +13,7 @@ const InvoiceRow = ({ invoice, tsDate }) => (
     }`}>
     <div className="values-wrapper">
       <div className={styles.value}>
-        <Balance amount={invoice.value} />
+        <Balance amount={invoice.amtPaidAtoms || invoice.value} />
       </div>
       {invoice.amtPaidAtoms && invoice.amtPaidAtoms !== invoice.value ? (
         <div className="amtpaid">
